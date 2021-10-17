@@ -8,6 +8,8 @@ organizing merkle proof encodings for JOSE and COSE.
 The spec does way to much in one place currently,
 hopefully we can find other IETF specs to delegate to.
 
+Specifically [JWP](https://github.com/json-web-proofs/json-web-proofs)
+
 ## Contributing
 
 The main specification is written in the markdown, however to preview the changes you have made in the final format, the following steps can be followed.

@@ -271,6 +271,76 @@ Procedure:
 
 # JOSE Encoding
 
+## Root Proof
+
+### Decoded
+
+```
+{
+
+  // From JWP "Protected Header"
+  // always disclosed
+  "protected": {
+
+    "kid": "did:example:123#key-0"
+
+    "root": "SflKxwRJSM...",
+    "alg": "MDP+ES256+JP", // merkle disclosure with json pointer
+    "zip": "DEF"
+
+    "signature": "SflKxwRJSM", // over the entire protected header.
+  },
+
+  // From JWP "Payloads" and "Proof"
+  // selectively disclosed
+  "payloads": [ { message }, ...]
+  "proof": [ { path }, ... ],
+
+  // never disclosed
+  "nonce": "0IjoxNTE2MjM5..."
+
+}
+```
+
+### Encoded
+
+```
+PROTECTED.PAYLOADS.PROOF.NONCE // base64url ( JSON.stringify )
+```
+
+## Derived Proof
+
+### Decoded
+
+```
+{
+
+  // From JWP "Protected Header"
+  // always disclosed
+  "protected": {
+
+    "kid": "did:example:123#key-0"
+
+    "root": "SflKxwRJSM...",
+    "alg": "MDP+ES256+JP", // merkle disclosure with json pointer
+    "zip": "DEF"
+
+    "signature": "SflKxwRJSM", // over the entire protected header.
+  },
+
+  // From JWP "Payloads" and "Proof"
+  // selectively disclosed
+  "payloads": [ { message }, ...]
+  "proof": [ { path }, ... ],
+}
+```
+
+### Encoded
+
+```
+PROTECTED.PAYLOADS.PROOF // base64url ( JSON.stringify )
+```
+
 //TODO
 
 # COSE Encoding
