@@ -1,0 +1,14 @@
+{
+  "name": "jwp-mdt",
+  "version": "1.0.0",
+  "description": "[Latest Draft](https://or13.github.io/jwp-mdt/)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "./scripts/build-html.sh"
+  },
+  "author": "Orie Steele",
+  "license": "ISC"
+}
