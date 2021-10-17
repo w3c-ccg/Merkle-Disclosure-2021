@@ -63,7 +63,7 @@ document, are to be interpreted as described in [@!RFC2119].
 
 This document is organized as follows:
 
-- Section 2 defines terminology and the high-level API.
+- [Section 2](#section-2) defines terminology and the high-level API.
 
 - Section 3 defines primitive operations used in the merkle proof signature scheme.
 
@@ -71,7 +71,7 @@ This document is organized as follows:
 
 - Section 5 defines COSE encoding requirements.
 
-- Section 7 defines security considerations.
+- Section 6 defines security considerations.
 
 - Section 7 defines the references.
 

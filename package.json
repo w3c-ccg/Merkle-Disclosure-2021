@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "build": "./scripts/build-html.sh"
+    "build": "./scripts/build-html.sh",
+    "shove": "git add -A; git commit -m ':rocket:'; git push origin main"
   },
   "author": "Orie Steele",
   "license": "ISC"
