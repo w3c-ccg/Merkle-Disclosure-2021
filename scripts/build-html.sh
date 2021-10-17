@@ -6,3 +6,6 @@ rm jwp-mdt-00.xml
 
 # Rename the HTML version for hosting with GH pages
 mv jwp-mdt-00.html ./docs/index.html
+
+# github pages 
+cp ./docs/index.html ./docs/404.html
