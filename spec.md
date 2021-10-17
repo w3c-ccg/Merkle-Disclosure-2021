@@ -55,6 +55,28 @@ The keywords **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **S
 **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL**, when they appear in this
 document, are to be interpreted as described in [@!RFC2119].
 
+# Overview
+
+//TODO
+
+## Organization of this document
+
+This document is organized as follows:
+
+- Section 2 defines terminology and the high-level API.
+
+- Section 3 defines primitive operations used in the merkle proof signature scheme.
+
+- Section 4 defines JOSE encoding requirements
+
+- Section 5 defines COSE encoding requirements.
+
+- Section 7 defines security considerations.
+
+- Section 7 defines the references.
+
+- Section 8 defines test vectors.
+
 ## Terminology
 
 The following terminology is used throughout this document:
@@ -125,26 +147,6 @@ verifyProofs(messages, proofs, root) -> verification
 
 sha256
 : The SHA-256 hash function defined in [@!RFC6234].
-
-# Overview
-
-//TODO
-
-## Organization of this document
-
-This document is organized as follows:
-
-- The remainder of this section defines terminology and the high-level API.
-
-- Section 2 defines primitive operations used in the merkle proof signature scheme. These operations MUST NOT be used alone.
-
-- Section 3 defines JSON encoding requirements.
-
-- Section 4 defines security considerations.
-
-- Section 5 defines the references.
-
-- Section 6 defines test vectors.
 
 ## Comparison with BBS+ Signatures
 
@@ -266,6 +268,14 @@ Outputs:
 Procedure:
 
 // TODO
+
+# JOSE Encoding
+
+//TODO
+
+# COSE Encoding
+
+//TODO
 
 # Security Considerations
 
