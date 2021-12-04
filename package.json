@@ -8,8 +8,17 @@
   },
   "scripts": {
     "build": "./scripts/build-html.sh",
-    "shove": "git add -A; git commit -m ':rocket:'; git push origin main"
+    "shove": "git add -A; git commit -m ':rocket:'; git push origin main",
+    "test": "jest"
   },
   "author": "Orie Steele",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@settlemint/merkle-tools": "^1.0.7",
+    "base64url": "^3.0.1",
+    "jest": "^27.4.3",
+    "jose": "^4.3.7",
+    "pako": "^2.0.4",
+    "uuid": "^8.3.2"
+  }
 }
