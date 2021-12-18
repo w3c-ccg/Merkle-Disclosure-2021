@@ -164,4 +164,4 @@ const verifyProof = (messages, proofs, root) => {
   });
 };
 
-module.exports = { generateProof, deriveProof, verifyProof };
+module.exports = { generateProof, deriveProof, verifyProof, expandProofs };

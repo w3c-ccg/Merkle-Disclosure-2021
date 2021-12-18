@@ -2,6 +2,20 @@ const base64url = require("base64url");
 const { generateProof, deriveProof, verifyProof } = require("./merkle");
 const { sign, verify } = require("./jws");
 
+const tags = {
+  root: "00",
+  nonce: "01",
+  signature: "02",
+  proofs: "03",
+};
+
+const tagsInverse = {
+  "00": "root",
+  "01": "nonce",
+  "02": "signature",
+  "03": "proofs",
+};
+
 const compactJwp = (jwp) => {
   const header = base64url.encode(JSON.stringify(jwp.protected));
   return header + "." + jwp.payloads.join("~") + "." + jwp.proof;
@@ -118,4 +132,91 @@ const verifyJwp = async (expandedJwp, publicKeyJwk) => {
   }
 };
 
-module.exports = { generate, derive, verify: verifyJwp };
+const compactJwpProof = (jwp) => {
+  const decodedProof = JSON.parse(base64url.decode(jwp.proof));
+  const root = Buffer.from(decodedProof.root, "hex");
+  const nonce = Buffer.from(decodedProof.nonce);
+  const signature = Buffer.from(decodedProof.signature, "base64");
+  const proofs = Buffer.from(decodedProof.proofs, "base64");
+  const buff = Buffer.concat([
+    Buffer.concat([
+      Buffer.from(tags.root, "hex"),
+      Buffer.from(root.length.toString(16), "hex"),
+      root,
+    ]),
+    Buffer.concat([
+      Buffer.from(tags.nonce, "hex"),
+      Buffer.from(nonce.length.toString(16), "hex"),
+      nonce,
+    ]),
+    Buffer.concat([
+      Buffer.from(tags.signature, "hex"),
+      Buffer.from(signature.length.toString(16), "hex"),
+      signature,
+    ]),
+    Buffer.concat([
+      Buffer.from(tags.proofs, "hex"),
+      Buffer.from(proofs.length.toString(16), "hex"),
+      proofs,
+    ]),
+  ]);
+  return {
+    ...jwp,
+    proof: base64url.encode(buff),
+  };
+};
+
+const expandJwpProof = (jwp) => {
+  let buff = Buffer.from(jwp.proof, "base64");
+
+  const comps = [];
+
+  while (buff.length) {
+    const tag = buff.slice(0, 1);
+    const length = parseInt(buff.slice(1, 2).toString("hex"), 16); /// this seems wrong
+    const value = buff.slice(2, length + 2);
+    buff = buff.slice(length + 2);
+    // console.log(buff);
+    comps.push({ tag, length, value });
+    // buff = { length: 0 };
+  }
+  const compObjs = comps.map((c) => {
+    const t = tagsInverse[c.tag.toString("hex")];
+    let v;
+
+    if (t === "root") {
+      v = c.value.toString("hex");
+    } else if (t === "nonce") {
+      v = c.value.toString();
+    } else if (t === "proofs") {
+      v = c.value.toString("base64");
+    } else {
+      v = base64url.encode(c.value);
+    }
+
+    return { [t]: v };
+  });
+
+  const obj = compObjs.reduce((element, aggregate = {}) => {
+    return { ...aggregate, ...element };
+  });
+
+  const ordered = {
+    root: obj.root,
+    nonce: obj.nonce,
+    proofs: obj.proofs,
+    signature: obj.signature,
+  };
+  return {
+    ...jwp,
+    proof: base64url.encode(JSON.stringify(ordered)),
+  };
+};
+
+module.exports = {
+  generate,
+  derive,
+  verify: verifyJwp,
+  compactJwpProof,
+  expandJwpProof,
+};
