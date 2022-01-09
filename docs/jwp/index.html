@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>Json Web Proof Merkle Disclosure Token</title>
+<title>Json Web Proofs for Binary Merkle Trees</title>
 <meta content="Orie Steele" name="author">
 <meta content="Michael Prorock" name="author">
 <meta content="
-       Merkleproofs have been around for a long time, but there has never been a standardd JSON encoding for them. 
+       Merkle proofs are already being used to provide certificate transparency in [[RFC9162]]. 
+       The purpose of this specification is to define a  generic  encoding of merkle audit paths that is suitable for combining with [[RFC7515]] to construct selective disclosure proofs, that are not bound to the needs of certificate transparency, and that are suitable for more generic applications such as  W3C Verifiable Credentials  and  W3C Decentralized Identifiers . 
     " name="description">
 <meta content="xml2rfc 3.12.0" name="generator">
-<meta content="jwp-mdt-00" name="ietf.draft">
+<meta content="jwp-bmt-00" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.12.0
     Python 3.10.1
@@ -30,7 +31,7 @@
     setuptools 57.5.0
     six 1.16.0
 -->
-<link href="./jwp-mdt-00.xml" rel="alternate" type="application/rfc+xml">
+<link href="./jwp-bmt-00.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">/*
 
@@ -1183,7 +1184,7 @@ li > p:last-of-type {
 <table class="ears">
 <thead><tr>
 <td class="left"></td>
-<td class="center">JWP-MDT</td>
+<td class="center">JWP-BMT</td>
 <td class="right">January 2022</td>
 </tr></thead>
 <tfoot><tr>
@@ -1210,10 +1211,11 @@ li > p:last-of-type {
 </dd>
 </dl>
 </div>
-<h1 id="title">Json Web Proof Merkle Disclosure Token</h1>
+<h1 id="title">Json Web Proofs for Binary Merkle Trees</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">Merkleproofs have been around for a long time, but there has never been a standardd JSON encoding for them.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">Merkle proofs are already being used to provide certificate transparency in [[RFC9162]].<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">The purpose of this specification is to define a <strong>generic</strong> encoding of merkle audit paths that is suitable for combining with [[RFC7515]] to construct selective disclosure proofs, that are not bound to the needs of certificate transparency, and that are suitable for more generic applications such as <a href="https://www.w3.org/TR/vc-data-model/">W3C Verifiable Credentials</a> and <a href="https://www.w3.org/TR/did-core/">W3C Decentralized Identifiers</a>.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <div id="toc">
 <section id="section-toc.1">
@@ -1227,108 +1229,125 @@ li > p:last-of-type {
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
                 <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="xref">1.1</a>.  <a href="#name-notational-conventions" class="xref">Notational Conventions</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="xref">1.2</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
             <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-overview" class="xref">Overview</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
-                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-organization-of-this-docume" class="xref">Organization of this document</a></p>
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-k-ary-merkle-trees" class="xref">K-ary Merkle Trees</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
-                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>.  <a href="#name-comparison-with-rfc9162" class="xref">Comparison with RFC9162</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                    <p id="section-toc.1-1.2.2.2.2.1.1"><a href="#section-2.2.1" class="xref">2.2.1</a>.  <a href="#name-tree-construction" class="xref">Tree Construction</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.2">
+                    <p id="section-toc.1-1.2.2.2.2.2.1"><a href="#section-2.2.2" class="xref">2.2.2</a>.  <a href="#name-agility-for-hash-algorithms" class="xref">Agility for Hash Algorithms</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.3">
+                    <p id="section-toc.1-1.2.2.2.2.3.1"><a href="#section-2.2.3" class="xref">2.2.3</a>.  <a href="#name-agility-for-signature-algor" class="xref">Agility for Signature Algorithms</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
                 <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>.  <a href="#name-comparison-with-bbs-signatu" class="xref">Comparison with BBS+ Signatures</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="xref">2.4</a>.  <a href="#name-agility-for-hash-algorithms-2" class="xref">Agility for Hash Algorithms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.5">
+                <p id="section-toc.1-1.2.2.5.1"><a href="#section-2.5" class="xref">2.5</a>.  <a href="#name-agility-for-signature-algori" class="xref">Agility for Signature Algorithms</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-core-operations" class="xref">Core operations</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
-                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="xref">3.1</a>.  <a href="#name-parameters" class="xref">Parameters</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
-                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="xref">3.2</a>.  <a href="#name-keyvalidate" class="xref">KeyValidate</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
-                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="xref">3.3</a>.  <a href="#name-generate-proof" class="xref">Generate Proof</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
-                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="xref">3.4</a>.  <a href="#name-derive-proof" class="xref">Derive Proof</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
-                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="xref">3.5</a>.  <a href="#name-verify-proof" class="xref">Verify Proof</a></p>
-</li>
-            </ul>
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-tree-constuction" class="xref">Tree Constuction</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
-            <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-jose-encoding" class="xref">JOSE Encoding</a></p>
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-encoding" class="xref">Encoding</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
-                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-root-proof" class="xref">Root Proof</a></p>
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-binary" class="xref">Binary</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.1">
-                    <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="xref">4.1.1</a>.  <a href="#name-decoded" class="xref">Decoded</a></p>
+                    <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="xref">4.1.1</a>.  <a href="#name-merkle-audit-paths" class="xref">Merkle Audit Paths</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.2">
-                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="xref">4.1.2</a>.  <a href="#name-encoded" class="xref">Encoded</a></p>
+                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="xref">4.1.2</a>.  <a href="#name-encoding-membership-proofs" class="xref">Encoding Membership Proofs</a></p>
 </li>
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
-                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-derived-proof" class="xref">Derived Proof</a></p>
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-authenticated-full-disclosu" class="xref">Authenticated Full Disclosure Proof</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
-                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="xref">4.2.1</a>.  <a href="#name-decoded-2" class="xref">Decoded</a></p>
+                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="xref">4.2.1</a>.  <a href="#name-jose" class="xref">JOSE</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.2">
-                    <p id="section-toc.1-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="xref">4.2.2</a>.  <a href="#name-encoded-2" class="xref">Encoded</a></p>
+                    <p id="section-toc.1-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="xref">4.2.2</a>.  <a href="#name-cose" class="xref">COSE</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="xref">4.3</a>.  <a href="#name-authenticated-selective-dis" class="xref">Authenticated Selective Disclosure Proof</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.1">
+                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="xref">4.3.1</a>.  <a href="#name-jose-2" class="xref">JOSE</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.2">
+                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="xref">4.3.2</a>.  <a href="#name-cose-2" class="xref">COSE</a></p>
 </li>
                 </ul>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-cose-encoding" class="xref">COSE Encoding</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="xref">5.1</a>.  <a href="#name-validating-public-keys" class="xref">Validating Public Keys</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="xref">5.2</a>.  <a href="#name-disclosure-of-root-nonce" class="xref">Disclosure of Root Nonce</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="xref">5.3</a>.  <a href="#name-forgery-attacks-on-unbalanc" class="xref">Forgery Attacks on Unbalanced Binary Merkle Trees</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="xref">5.4</a>.  <a href="#name-side-channel-attacks" class="xref">Side Channel Attacks</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="xref">5.5</a>.  <a href="#name-randomness-considerations" class="xref">Randomness Considerations</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="xref">5.6</a>.  <a href="#name-choice-of-hash-primitive" class="xref">Choice of Hash Primitive</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.7">
+                <p id="section-toc.1-1.5.2.7.1"><a href="#section-5.7" class="xref">5.7</a>.  <a href="#name-choice-of-signature-primiti" class="xref">Choice of Signature Primitive</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
-                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="xref">6.1</a>.  <a href="#name-validating-public-keys" class="xref">Validating public keys</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
-                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="xref">6.2</a>.  <a href="#name-disclosure-of-root-nonce" class="xref">Disclosure of root nonce</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
-                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="xref">6.3</a>.  <a href="#name-side-channel-attacks" class="xref">Side channel attacks</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
-                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="xref">6.4</a>.  <a href="#name-randomness-considerations" class="xref">Randomness considerations</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
-                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="xref">6.5</a>.  <a href="#name-choice-of-signature-primiti" class="xref">Choice of Signature Primitive</a></p>
-</li>
-            </ul>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-appendix" class="xref">Appendix</a></p>
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-appendix" class="xref">Appendix</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="xref">8.1</a>.  <a href="#name-test-vectors" class="xref">Test Vectors</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-test-vectors" class="xref">Test Vectors</a></p>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1339,25 +1358,22 @@ li > p:last-of-type {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">Summary of merkle proofs<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">Challenges with proof size<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document describes the Json Web Proof Merkle Disclosure Token.
-An encoding for merkle proofs inspired by JWT.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The scheme features many important properties:<a href="#section-1-4" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="compact type-1" id="section-1-5">
-<li id="section-1-5.1">Deterministic nonce generation for membership proofs.<a href="#section-1-5.1" class="pilcrow">¶</a>
+<p id="section-1-1">The scheme described herin features many important properties:<a href="#section-1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-1-2">
+<li id="section-1-2.1">Defined deterministic nonce generation for membership proofs, to protect against second pre-image attacks.<a href="#section-1-2.1" class="pilcrow">¶</a>
 </li>
-        <li id="section-1-5.2">Encoding merkle root and related proof data use JWA.<a href="#section-1-5.2" class="pilcrow">¶</a>
+        <li id="section-1-2.2">Defined encoding of binary packed sets of merkle audit paths suitable for expression in JSON.<a href="#section-1-2.2" class="pilcrow">¶</a>
 </li>
-        <li id="section-1-5.3">Compressing membership proofs<a href="#section-1-5.3" class="pilcrow">¶</a>
+        <li id="section-1-2.3">Defined compression of sets of audit paths to reduce data redundancy for sparse redactions under selective disclosure schemes.<a href="#section-1-2.3" class="pilcrow">¶</a>
 </li>
-        <li id="section-1-5.4">Verifying membership proofs<a href="#section-1-5.4" class="pilcrow">¶</a>
+        <li id="section-1-2.4">Defined verification of merkle proofs combined with detached JWS as specified by [[RFC7797]].<a href="#section-1-2.4" class="pilcrow">¶</a>
 </li>
       </ol>
-<p id="section-1-6">These properties allow the scheme to be used in applications where privacy and data minimization techniques are desired and/or required.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">This scheme is meant to expose interfaces compatible with <a href="https://mattrglobal.github.io/bbs-signatures-spec/">BBS+ Signature Scheme</a>. Many of the same benefits from that scheme apply here:<a href="#section-1-7" class="pilcrow">¶</a></p>
-<blockquote id="section-1-8">
-        <p id="section-1-8.1">A recent emerging use case applies signature schemes in <a href="https://www.w3.org/TR/vc-data-model/">verifiable credentials</a>. One problem with using simple signature schemes like ECSDA or ED25519 is a holder must disclose the entire signed message and signature for verification. Circuit based logic can be applied to verify these in zero-knowledge like SNARKS or Bulletproofs with R1CS but tend to be complicated. BBS+ on the other hand adds, to verifiable credentials or any other application, the ability to do very efficient zero-knowledge proofs. A holder gains the ability to choose which claims to reveal to a relying party without the need for any additional complicated logic.<a href="#section-1-8.1" class="pilcrow">¶</a></p>
+<p id="section-1-3">These properties allow the scheme to be used in applications where privacy and data minimization techniques are desired and/or required.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This scheme is meant to expose interfaces compatible with <a href="https://mattrglobal.github.io/bbs-signatures-spec/">BBS+ Signature Scheme</a>.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">Many of the same benefits from that scheme apply here:<a href="#section-1-5" class="pilcrow">¶</a></p>
+<blockquote id="section-1-6">
+        <p id="section-1-6.1">A recent emerging use case applies signature schemes in <a href="https://www.w3.org/TR/vc-data-model/">verifiable credentials</a>. One problem with using simple signature schemes like ECSDA or ED25519 is a holder must disclose the entire signed message and signature for verification. Circuit based logic can be applied to verify these in zero-knowledge like SNARKS or Bulletproofs with R1CS but tend to be complicated. BBS+ on the other hand adds, to verifiable credentials or any other application, the ability to do very efficient zero-knowledge proofs. A holder gains the ability to choose which claims to reveal to a relying party without the need for any additional complicated logic.<a href="#section-1-6.1" class="pilcrow">¶</a></p>
 </blockquote>
 <div id="notational-conventions">
 <section id="section-1.1">
@@ -1369,6 +1385,56 @@ An encoding for merkle proofs inspired by JWT.<a href="#section-1-3" class="pilc
 document, are to be interpreted as described in <span>[<a href="#RFC2119" class="xref">RFC2119</a>]</span>.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="terminology">
+<section id="section-1.2">
+        <h3 id="name-terminology">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+        </h3>
+<p id="section-1.2-1">We will rely on the general terminology defined in [[RFC7515]], [[RFC7797]] and concepts defined in [[RFC9162]].<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">We introduce primarily 2 new concepts needed to generalize authenticated set membership proofs based on binary merkle trees.<a href="#section-1.2-2" class="pilcrow">¶</a></p>
+<p id="section-1.2-3">The following terminology is used throughout this document:<a href="#section-1.2-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-1.2-4">
+          <dt id="section-1.2-4.1">Full Disclosure Proof</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-4.2">A data structure that represents all members in a set, and all proofs of membership<a href="#section-1.2-4.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-4.3">Selective Disclosure Proof</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-4.4">A data structure that represents a non-strict subset of a FullDisclosureProof.<a href="#section-1.2-4.4" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-4.5">Root Nonce</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-4.6">A source of entropy that when combined with a suitable cryptographic hash function is sufficient to prevent brute force attacks on siblings of disclosed members.<a href="#section-1.2-4.6" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-4.7">Calculate Member Nonce</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-4.8">A function for assigning nonces to members based on their order, Root Nonce, and the chosen hash function. Example provided below in typescript.<a href="#section-1.2-4.8" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<div id="section-1.2-5">
+<pre class="lang-ts sourcecode">const calculateMessageNonce = (
+  message: Buffer,
+  index: number,
+  rootNonce: Buffer,
+  hash: Function
+) =&gt; {
+  const encodedIndex = Buffer.from(varint.encode(index));
+  return hash(Buffer.concat([message, encodedIndex, rootNonce]));
+};
+</pre><a href="#section-1.2-5" class="pilcrow">¶</a>
+</div>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-1.2-6">
+          <dt id="section-1.2-6.1">Salted Member</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-6.2">The hash of a member bytes and its <code>memberNonce</code> under a chosen cryptographic hash function. These values represent the leaves of a binary merkle tree that encodes membership proofs for salted members.<a href="#section-1.2-6.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-1.2-6.3">Binary Merkle Tree of Salted Members</dt>
+          <dd style="margin-left: 1.5em" id="section-1.2-6.4">The binary merkle tree produced through concatonation, and hashing of <code>Salted Members</code><a href="#section-1.2-6.4" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="overview">
@@ -1376,135 +1442,62 @@ document, are to be interpreted as described in <span>[<a href="#RFC2119" class=
       <h2 id="name-overview">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-overview" class="section-name selfRef">Overview</a>
       </h2>
-<p id="section-2-1">//TODO<a href="#section-2-1" class="pilcrow">¶</a></p>
-<div id="organization-of-this-document">
+<div id="k-ary-merkle-trees">
 <section id="section-2.1">
-        <h3 id="name-organization-of-this-docume">
-<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-organization-of-this-docume" class="section-name selfRef">Organization of this document</a>
+        <h3 id="name-k-ary-merkle-trees">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-k-ary-merkle-trees" class="section-name selfRef">K-ary Merkle Trees</a>
         </h3>
-<p id="section-2.1-1">This document is organized as follows:<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-2.1-2.1">
-            <p id="section-2.1-2.1.1"><a href="#section-2">Section 2</a> defines terminology and the high-level API.<a href="#section-2.1-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-2.1-2.2">
-            <p id="section-2.1-2.2.1">Section 3 defines primitive operations used in the merkle proof signature scheme.<a href="#section-2.1-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-2.1-2.3">
-            <p id="section-2.1-2.3.1">Section 4 defines JOSE encoding requirements<a href="#section-2.1-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-2.1-2.4">
-            <p id="section-2.1-2.4.1">Section 5 defines COSE encoding requirements.<a href="#section-2.1-2.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-2.1-2.5">
-            <p id="section-2.1-2.5.1">Section 6 defines security considerations.<a href="#section-2.1-2.5.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-2.1-2.6">
-            <p id="section-2.1-2.6.1">Section 7 defines the references.<a href="#section-2.1-2.6.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-2.1-2.7">
-            <p id="section-2.1-2.7.1">Section 8 defines test vectors.<a href="#section-2.1-2.7.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+<p id="section-2.1-1">We restrict this specification to Binary (2-ary) Merkle Trees.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">In short, increasing the branching factor of the merkle tree above 2 does not yield the desired properties.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">See <a href="https://math.mit.edu/research/highschool/primes/materials/2018/Kuszmaul.pdf">Verkle Trees</a>.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">See <a href="https://eprint.iacr.org/2011/495.pdf">Vector Commitments and their Applications</a>.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-5">See <a href="https://www.iacr.org/archive/eurocrypt2008/49650430/49650430.pdf">Zero-Knowledge Sets with short proofs</a>.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.1-6">Vector commitment schemes are not defined in this specification,
+however we believe that some similar approach using them would be worth considering in future work.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="terminology">
+<div id="comparison-with-rfc9162">
 <section id="section-2.2">
-        <h3 id="name-terminology">
-<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+        <h3 id="name-comparison-with-rfc9162">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-comparison-with-rfc9162" class="section-name selfRef">Comparison with RFC9162</a>
         </h3>
-<p id="section-2.2-1">The following terminology is used throughout this document:<a href="#section-2.2-1" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlCompact dlParallel" id="section-2.2-2">
-          <dt id="section-2.2-2.1">SK</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.2">The secret key for the signature scheme.<a href="#section-2.2-2.2" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.3">PK</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.4">The public key for the signature scheme.<a href="#section-2.2-2.4" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.5">U</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.6">The set of messages to be signed or verified.<a href="#section-2.2-2.6" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.7">M</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.8">The set of messages to be signed or verified paired with their deterministic nonce.<a href="#section-2.2-2.8" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.9">protected</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.10">The protected header to be signed by the JWA scheme.<a href="#section-2.2-2.10" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.11">payload</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.12">The protected payload to be signed by the JWA scheme.<a href="#section-2.2-2.12" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.13">signature</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.14">The digital signature output.<a href="#section-2.2-2.14" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.15">nonce</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.16">A cryptographic nonce<a href="#section-2.2-2.16" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.17">path</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.18">A set membership proof, represented as a path in a merkle proof from a leaf to a root.<a href="#section-2.2-2.18" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.19">proofs</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.20">A set of membership proofs, encoded as JSON.<a href="#section-2.2-2.20" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.21">compressedProofs</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.22">
-            <code>proofs</code> compressed and encoded as base64url.<a href="#section-2.2-2.22" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-2.23">calculateMessageNonce(message, index, rootNonce) -&gt; nonce</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-2.24">The funtion that takes a message, index and rootNonce and assigns a deterministic nonce for the message.<a href="#section-2.2-2.24" class="pilcrow">¶</a>
-</dd>
-        <dd class="break"></dd>
-</dl>
-<div class="alignLeft art-text artwork" id="section-2.2-3">
-<pre>const calculateMessageNonce = (
-  message: string,
-  index: number,
-  rootNonce: string
-) =&gt; {
-  return sha256(message + index + rootNonce);
-};
-</pre><a href="#section-2.2-3" class="pilcrow">¶</a>
+<div id="tree-construction">
+<section id="section-2.2.1">
+          <h4 id="name-tree-construction">
+<a href="#section-2.2.1" class="section-number selfRef">2.2.1. </a><a href="#name-tree-construction" class="section-name selfRef">Tree Construction</a>
+          </h4>
+<p id="section-2.2.1-1">The most obvious difference is the limitations imposed on tree construction that differ from the construction of tree's used by Bitcoin.<a href="#section-2.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.1-2">See <a href="https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1">RFC9162 Definition of the Merkle Tree</a>.<a href="#section-2.2.1-2" class="pilcrow">¶</a></p>
+</section>
 </div>
-<span class="break"></span><dl class="dlCompact dlParallel" id="section-2.2-4">
-          <dt id="section-2.2-4.1">verification</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.2">A boolean representing a proof verification, success as true, failure as false.<a href="#section-2.2-4.2" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-4.3">compressProofs(proofs) -&gt; compressedProofs</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.4">The function that takes JSON encoded path based membership proofs and returns a compressed representation of them. Inverse of <code>expandProofs</code>.<a href="#section-2.2-4.4" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-4.5">expandProofs(compressedProofs) -&gt; proofs</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.6">The function that takes a compressed representation of membership proofs and return them in JSON. Inverse of <code>compressProofs</code>.<a href="#section-2.2-4.6" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-4.7">getProofs(messages, rootNonce) -&gt; proofs</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.8">The function that takes a set of messages and a rootNonce and produces a merkle root and membership proofs for each message.<a href="#section-2.2-4.8" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-4.9">deriveProofs(disclosureIndexes, proofs, messages, rootNonce) -&gt; compressedProofs</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.10">The function that takes a set of disclosureIndexes, proofs, messages and a rootNonce and produces compressedProofs represenetation of the messages indentified by disclosureIndexes.<a href="#section-2.2-4.10" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-4.11">verifyProofs(messages, proofs, root) -&gt; verification</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.12">The function that takes a set messages, proofs and a merkle root, and returns true when all messages have a membership proof that is true, and false otherwise.<a href="#section-2.2-4.12" class="pilcrow">¶</a>
-</dd>
-          <dd class="break"></dd>
-<dt id="section-2.2-4.13">sha256</dt>
-          <dd style="margin-left: 1.5em" id="section-2.2-4.14">The SHA-256 hash function defined in <span>[<a href="#RFC6234" class="xref">RFC6234</a>]</span>.<a href="#section-2.2-4.14" class="pilcrow">¶</a>
-</dd>
-        <dd class="break"></dd>
-</dl>
+<div id="agility-for-hash-algorithms">
+<section id="section-2.2.2">
+          <h4 id="name-agility-for-hash-algorithms">
+<a href="#section-2.2.2" class="section-number selfRef">2.2.2. </a><a href="#name-agility-for-hash-algorithms" class="section-name selfRef">Agility for Hash Algorithms</a>
+          </h4>
+<p id="section-2.2.2-1">[[RFC9162]] refer to the IANA registry for <a href="https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.1">Hash Algorithms</a><a href="#section-2.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.2-2">But only define support for <a href="https://oidref.com/2.16.840.1.101.3.4.2.1">SHA-256</a><a href="#section-2.2.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="agility-for-signature-algorithms">
+<section id="section-2.2.3">
+          <h4 id="name-agility-for-signature-algor">
+<a href="#section-2.2.3" class="section-number selfRef">2.2.3. </a><a href="#name-agility-for-signature-algor" class="section-name selfRef">Agility for Signature Algorithms</a>
+          </h4>
+<p id="section-2.2.3-1">[[RFC9262]] refer to IANA registry for <a href="https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.2">Signature Algorithms</a><a href="#section-2.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.3-2">But only define support for a few signature algorithms:<a href="#section-2.2.3-2" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-2.2.3-3.1">ecdsa_secp256r1_sha256<a href="#section-2.2.3-3.1" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-2.2.3-3.2">ecdsa_secp256r1_sha256<a href="#section-2.2.3-3.2" class="pilcrow">¶</a>
+</li>
+            <li class="compact" id="section-2.2.3-3.3">ed25519<a href="#section-2.2.3-3.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-2.2.3-4">We prefer to generalize and enable support the full range of algorithms availabe under <a href="https://www.iana.org/assignments/jose/jose.xhtml">jose</a>.<a href="#section-2.2.3-4" class="pilcrow">¶</a></p>
+<p id="section-2.2.3-5">We believe choices regarding agility should be handled at a higher layer, but agree that restriction is a best practice.<a href="#section-2.2.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="comparison-with-bbs-signatures">
@@ -1512,396 +1505,462 @@ document, are to be interpreted as described in <span>[<a href="#RFC2119" class=
         <h3 id="name-comparison-with-bbs-signatu">
 <a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-comparison-with-bbs-signatu" class="section-name selfRef">Comparison with BBS+ Signatures</a>
         </h3>
-<p id="section-2.3-1">Not exactly the same thing, but probably better than comparing to vanilla JWA.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-1">BBS+ Signatures are in the process of being standardized.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">Refer to <a href="https://mattrglobal.github.io/bbs-signatures-spec/">Editors Draft of BBS+ Signature Scheme</a> for details.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.3-3">At a high level, we are seeking a larger degree of agility at both the hash and digital signature layers.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="agility-for-hash-algorithms-1">
+<section id="section-2.4">
+        <h3 id="name-agility-for-hash-algorithms-2">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-agility-for-hash-algorithms-2" class="section-name selfRef">Agility for Hash Algorithms</a>
+        </h3>
+<p id="section-2.4-1">We believe that Blake2b as defined in [[RFC7693]] is the only supported hash algorithm.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="agility-for-signature-algorithms-1">
+<section id="section-2.5">
+        <h3 id="name-agility-for-signature-algori">
+<a href="#section-2.5" class="section-number selfRef">2.5. </a><a href="#name-agility-for-signature-algori" class="section-name selfRef">Agility for Signature Algorithms</a>
+        </h3>
+<p id="section-2.5-1">We believe that BLS signature over BLS12381 as defined in <a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-pairing-friendly-curves-10">Pairing-Friendly Curves</a>, are the only supported signature scheme.<a href="#section-2.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
-<div id="core-operations">
+<div id="tree-constuction">
 <section id="section-3">
-      <h2 id="name-core-operations">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-core-operations" class="section-name selfRef">Core operations</a>
+      <h2 id="name-tree-constuction">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-tree-constuction" class="section-name selfRef">Tree Constuction</a>
       </h2>
-<p id="section-3-1">This section defines core operations used by the schemes defined in Section 3. These operations MUST NOT be used except as described in that section.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<div id="parameters">
-<section id="section-3.1">
-        <h3 id="name-parameters">
-<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-parameters" class="section-name selfRef">Parameters</a>
-        </h3>
-<p id="section-3.1-1">The core operations in this section depend on several parameters:<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.1-2.1">A JWA and JWS, plus associated functionality given in Section 1.4.<a href="#section-3.1-2.1" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.1-2.2">H, a hash function that MUST be a secure cryptographic hash function, e.g. SHA-256.<a href="#section-3.1-2.2" class="pilcrow">¶</a>
-</li>
-        </ul>
+<p id="section-3-1">Binary Merkle Trees are constructed via the following algorithm:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">See <a href="https://github.com/transmute-industries/verifiable-data/blob/main/packages/merkle-proof/src/index.ts#L179">compute tree</a><a href="#section-3-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3-3">
+<pre>let salted_members be the series defined by hashing the concatonation of each member bytes with its member nonce.
+let salted_members be the first level of a binary merkle tree, where each salted member is a leaf.
+for each pair of 2 leaves in the first level of the merkle tree, concatonate the leave and hash the result yielding the next first level of the merkle tree.
+if the first level of the tree is odd AND its length is not 1 (the end state), promote the odd leaf to the next leve and repeat the process.
+The algorithm ends when the first level of the merkle tree has length 1, its single element is the merkle root.
+</pre><a href="#section-3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3-4">Here is a simple visualizaton of a tree constructed in this manner:<a href="#section-3-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3-5">
+<pre>      h(h(h(sm0+sm1) + h(sm2+sm3)) + sm4) (merkle root)
+      /                         \
+    h(h(sm0+sm1) + h(sm2+sm3))  sm4 (2 siblings)
+    /          \                /
+   h(sm0+sm1)   h(sm2+sm3)   sm4 (3 siblings)
+  /   \        /   \         /
+sm0   sm1   sm2    sm3      sm4 (leaves are the base level, 5 siblings)
+^     ^     ^      ^        ^
+|     |     |      |        |
+m0    m1    m2     m3       m4
+</pre><a href="#section-3-5" class="pilcrow">¶</a>
+</div>
+<p id="section-3-6">Note that this tree is "unbalanced" See <a href="#name-forgery-attacks-on-unbalanced-binary-merkle-trees">Forgery Attacks on Unbalanced Binary Merkle Trees</a>.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Also note that this algorithm differs from the one proposed in <a href="https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1">RFC9162</a>.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">The reason for this difference arises from our desire to support merkle trees and proofs used by <a href="https://bitcoin.stackexchange.com/questions/69018/merkle-root-and-merkle-proofs">Bitcoin</a>, and our desire to encode a generic merkle proof that is not bound to "Certificate Transparency".<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9">However, we may adjust the algorithm to match the one described in [[RFC9162]] in the future.<a href="#section-3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="keyvalidate">
-<section id="section-3.2">
-        <h3 id="name-keyvalidate">
-<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-keyvalidate" class="section-name selfRef">KeyValidate</a>
-        </h3>
-<p id="section-3.2-1">KeyValidate checks if the public key is valid.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">As an optimization, implementations MAY cache the result of KeyValidate in order to avoid unnecessarily repeating validation for known keys.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.2-3">
-<pre>result = KeyValidate(PK)
-</pre><a href="#section-3.2-3" class="pilcrow">¶</a>
-</div>
-<p id="section-3.2-4">Inputs:<a href="#section-3.2-4" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.2-5.1">PK, a public key<a href="#section-3.2-5.1" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.2-6">Outputs:<a href="#section-3.2-6" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.2-7.1">result, either VALID or INVALID<a href="#section-3.2-7.1" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.2-8">Procedure:<a href="#section-3.2-8" class="pilcrow">¶</a></p>
-<p id="section-3.2-9">// TODO<a href="#section-3.2-9" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="generate-proof">
-<section id="section-3.3">
-        <h3 id="name-generate-proof">
-<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-generate-proof" class="section-name selfRef">Generate Proof</a>
-        </h3>
-<p id="section-3.3-1">Generate proof computes set membership proofs and a signature from SK, over a vector of messages.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.3-2">
-<pre>{ root, nonce, proofs, signature } = generateProof((message\[i\],...,message\[L\]), SK)
-</pre><a href="#section-3.3-2" class="pilcrow">¶</a>
-</div>
-<p id="section-3.3-3">Inputs:<a href="#section-3.3-3" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.3-4.1">message[i],...,message[L], octet strings<a href="#section-3.3-4.1" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.3-4.2">SK, a secret key<a href="#section-3.3-4.2" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.3-5">Outputs:<a href="#section-3.3-5" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.3-6.1">root, an octet string<a href="#section-3.3-6.1" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.3-6.2">nonce, an octet string<a href="#section-3.3-6.2" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.3-6.3">proofs, an octet string<a href="#section-3.3-6.3" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.3-6.4">signature, an octet string<a href="#section-3.3-6.4" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.3-7">Procedure:<a href="#section-3.3-7" class="pilcrow">¶</a></p>
-<p id="section-3.3-8">// TODO<a href="#section-3.3-8" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="derive-proof">
-<section id="section-3.4">
-        <h3 id="name-derive-proof">
-<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-derive-proof" class="section-name selfRef">Derive Proof</a>
-        </h3>
-<p id="section-3.4-1">Derive proof transforms the output of generate proof filtering the set membership proofs
-to match the intended messages to be disclosed and applying the nonce algorithm.
-This process is also referred to as generating a selective disclosure proof.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.4-2">
-<pre>{ root, proofs, signature } = deriveProof(
-  (disclosureIndexes[i],...,disclosureIndexes[L]),
-  (message[i],...,message[L]),
-  (proof[i],...,proof[L]),
-  root,
-  nonce,
-  signature
-)
-</pre><a href="#section-3.4-2" class="pilcrow">¶</a>
-</div>
-<p id="section-3.4-3">Inputs:<a href="#section-3.4-3" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.4-4.1">disclosureIndexes[i],...,disclosureIndexes[L], octet integer.<a href="#section-3.4-4.1" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-4.2">message[i],...,message[L], octet strings.<a href="#section-3.4-4.2" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-4.3">proof[i],...,proof[L], octet strings.<a href="#section-3.4-4.3" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-4.4">root, octet string.<a href="#section-3.4-4.4" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-4.5">nonce, octet string.<a href="#section-3.4-4.5" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-4.6">signature, octet string.<a href="#section-3.4-4.6" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.4-5">Outputs:<a href="#section-3.4-5" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.4-6.1">root, octet string, unchanged by function.<a href="#section-3.4-6.1" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-6.2">proofs, octet string.<a href="#section-3.4-6.2" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.4-6.3">signature, octet string, unchanged by function.<a href="#section-3.4-6.3" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.4-7">Procedure:<a href="#section-3.4-7" class="pilcrow">¶</a></p>
-<p id="section-3.4-8">//TODO<a href="#section-3.4-8" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="verify-proof">
-<section id="section-3.5">
-        <h3 id="name-verify-proof">
-<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-verify-proof" class="section-name selfRef">Verify Proof</a>
-        </h3>
-<p id="section-3.5-1">Verify checks that a proof is valid for the octet string messages under the public key.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.5-2">
-<pre>verification = Verify((message[i],...,message[L]), (proof[i],...,proof[L]), root, signature, PK)
-</pre><a href="#section-3.5-2" class="pilcrow">¶</a>
-</div>
-<p id="section-3.5-3">Inputs:<a href="#section-3.5-3" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.5-4.1">message[i],...,message[L], octet strings.<a href="#section-3.5-4.1" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.5-4.2">proof[i],...,proof[L], octet strings.<a href="#section-3.5-4.2" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.5-4.3">root, octet string.<a href="#section-3.5-4.3" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.5-4.4">signature, octet string.<a href="#section-3.5-4.4" class="pilcrow">¶</a>
-</li>
-          <li class="compact" id="section-3.5-4.5">PK, a public key<a href="#section-3.5-4.5" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.5-5">Outputs:<a href="#section-3.5-5" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-3.5-6.1">verification, either VALID or INVALID.<a href="#section-3.5-6.1" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-3.5-7">Procedure:<a href="#section-3.5-7" class="pilcrow">¶</a></p>
-<p id="section-3.5-8">// TODO<a href="#section-3.5-8" class="pilcrow">¶</a></p>
-</section>
-</div>
-</section>
-</div>
-<div id="jose-encoding">
+<div id="encoding">
 <section id="section-4">
-      <h2 id="name-jose-encoding">
-<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-jose-encoding" class="section-name selfRef">JOSE Encoding</a>
+      <h2 id="name-encoding">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-encoding" class="section-name selfRef">Encoding</a>
       </h2>
-<div id="root-proof">
+<div id="binary">
 <section id="section-4.1">
-        <h3 id="name-root-proof">
-<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-root-proof" class="section-name selfRef">Root Proof</a>
+        <h3 id="name-binary">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-binary" class="section-name selfRef">Binary</a>
         </h3>
-<div id="decoded">
+<div id="merkle-audit-paths">
 <section id="section-4.1.1">
-          <h4 id="name-decoded">
-<a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-decoded" class="section-name selfRef">Decoded</a>
+          <h4 id="name-merkle-audit-paths">
+<a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-merkle-audit-paths" class="section-name selfRef">Merkle Audit Paths</a>
           </h4>
-<div class="alignLeft art-text artwork" id="section-4.1.1-1">
-<pre>{
-
-  // From JWP "Protected Header"
-  // always disclosed
-  "protected": {
-
-    "kid": "did:example:123#key-0"
-
-    "root": "SflKxwRJSM...",
-    "alg": "MDP+ES256+JP", // merkle disclosure with json pointer
-    "zip": "DEF"
-
-    "signature": "SflKxwRJSM", // over the entire protected header.
-  },
-
-  // From JWP "Payloads" and "Proof"
-  // selectively disclosed
-  "payloads": [ { message }, ...]
-  "proof": [ { path }, ... ],
-
-  // never disclosed
-  "nonce": "0IjoxNTE2MjM5..."
-
-}
-</pre><a href="#section-4.1.1-1" class="pilcrow">¶</a>
+<p id="section-4.1.1-1">In order to verify that member bytes are included in a merkle root, a verifier requires:<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-4.1.1-2">
+<li id="section-4.1.1-2.1">A nonce for the member bytes to protect against second pre-image attacks.<a href="#section-4.1.1-2.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.1-2.2">An "audit path" or "inclusion path" from the member leaf to the merkle root.<a href="#section-4.1.1-2.2" class="pilcrow">¶</a>
+</li>
+          </ol>
+<p id="section-4.1.1-3">This section defines a compact binary encoding of these "member proofs" based on approaches developed by Google and others related to "Protocol Buffers".<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-4">The main feature of protocol buffers which is used is called "varint".<a href="#section-4.1.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-5">This approach is also refered to as <a href="https://en.wikipedia.org/wiki/LEB128">LEB128</a>.<a href="#section-4.1.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-6">This approach is also used in <a href="https://webassembly.github.io/spec/core/binary/values.html">Web Assembly</a><a href="#section-4.1.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-7">This approach is also used in <a href="https://pkg.go.dev/github.com/multiformats/go-varint">multiformats</a>.<a href="#section-4.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-8">We remain unaware of a best normative reference to provide for "protocol buffer style varints".<a href="#section-4.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-9">See this expired <a href="https://datatracker.ietf.org/doc/html/draft-rfernando-protocol-buffers-00#page-5">internet draft for protocol buffers</a>.<a href="#section-4.1.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-10">See <a href="https://developers.google.com/protocol-buffers">Google's documentation for protocol buffers</a>.<a href="#section-4.1.1-10" class="pilcrow">¶</a></p>
+<div id="encoding-of-inclusion-paths">
+<section id="section-4.1.1.1">
+            <h5 id="name-encoding-of-inclusion-paths">
+<a href="#section-4.1.1.1" class="section-number selfRef">4.1.1.1. </a><a href="#name-encoding-of-inclusion-paths" class="section-name selfRef">Encoding of Inclusion Paths</a>
+            </h5>
+<p id="section-4.1.1.1-1">We describe a binary encoding of an "audit path" or "inclusion path" and a nonce, such that a verifier with a merkle root may confirm that some given "member bytes" are included in a merkle root.<a href="#section-4.1.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.1.1-2">We define a binary encoded "membership proof" or a given "member" bytes as follows:<a href="#section-4.1.1.1-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-4.1.1.1-3">
+              <dt id="section-4.1.1.1-3.1">numberOfAuditHashesProofs</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.1.1-3.2">A positive integer encoded via <code>varint</code>, representing the size of <code>auditDirectionsAsBits</code> and <code>auditHashes</code>.<a href="#section-4.1.1.1-3.2" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt id="section-4.1.1.1-3.3">auditDirectionsAsBits</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.1.1-3.4">A binary encoded bitstring representing the directions (left or right) in path from a leaf to a root in a binary merkle tree.<a href="#section-4.1.1.1-3.4" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt id="section-4.1.1.1-3.5">memberNonce</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.1.1-3.6">A value derived from a cryptographic hash function and the Root Nonce. This value MUST have the same length as each Hash in <code>auditHashes</code><a href="#section-4.1.1.1-3.6" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt id="section-4.1.1.1-3.7">auditHashes</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.1.1-3.8">A series (ordered) of hashes of size determined by the cryptographic hash function chosen, (32 bytes for SHA256).<a href="#section-4.1.1.1-3.8" class="pilcrow">¶</a>
+</dd>
+            <dd class="break"></dd>
+</dl>
+<p id="section-4.1.1.1-4">See Test Vectors for specific examples.<a href="#section-4.1.1.1-4" class="pilcrow">¶</a></p>
+</section>
 </div>
 </section>
 </div>
-<div id="encoded">
+<div id="encoding-membership-proofs">
 <section id="section-4.1.2">
-          <h4 id="name-encoded">
-<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-encoded" class="section-name selfRef">Encoded</a>
+          <h4 id="name-encoding-membership-proofs">
+<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-encoding-membership-proofs" class="section-name selfRef">Encoding Membership Proofs</a>
           </h4>
-<div class="alignLeft art-text artwork" id="section-4.1.2-1">
-<pre>PROTECTED.PAYLOADS.PROOF.NONCE // base64url ( JSON.stringify )
-</pre><a href="#section-4.1.2-1" class="pilcrow">¶</a>
+<p id="section-4.1.2-1">We describe a binary encoding of a Root Nonce, Merkle Root, and series (order matters) of "audit path" or "inclusion paths".<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-2">These values are encoded via a convention of <code>varint(length of bytes) + bytes</code>.<a href="#section-4.1.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-3">This is to support hash functions of varying lengths and member proofs of varying lengths.<a href="#section-4.1.2-3" class="pilcrow">¶</a></p>
+<div id="full-disclosure">
+<section id="section-4.1.2.1">
+            <h5 id="name-full-disclosure">
+<a href="#section-4.1.2.1" class="section-number selfRef">4.1.2.1. </a><a href="#name-full-disclosure" class="section-name selfRef">Full Disclosure</a>
+            </h5>
+<p id="section-4.1.2.1-1">We define a <code>Full Disclosure</code> membership proof as the result of compression (under zlib v1.2.8) of the following:<a href="#section-4.1.2.1-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-4.1.2.1-2">
+              <dt id="section-4.1.2.1-2.1">rootNonce</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.2.1-2.2">A value produced by the chosen cryptographic hash function applied to some source of randomness. See <a href="#name-randomness-considerations">Randomness considerations</a>. This value is encoded as varint (root nonce length in bytes) + root nonce bytes.<a href="#section-4.1.2.1-2.2" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt id="section-4.1.2.1-2.3">root</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.2.1-2.4">A merkle root defined from a binary merkle tree composed of members derived from the hash of the member bytes and the <code>memberNonce</code>. See <a href="#name-tree-construction">Tree Construction</a>. This value is encoded as varint (root length in bytes) + root bytes.<a href="#section-4.1.2.1-2.4" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt id="section-4.1.2.1-2.5">membershipProofs</dt>
+              <dd style="margin-left: 1.5em" id="section-4.1.2.1-2.6">A series of "membership proof" bytes, encoded under the scheme: varint (member proof length in bytes) + member proof bytes.<a href="#section-4.1.2.1-2.6" class="pilcrow">¶</a>
+</dd>
+            <dd class="break"></dd>
+</dl>
+<p id="section-4.1.2.1-3">When decoding first the <code>rootNonce</code> and <code>root</code> are removed using varint decoding.<a href="#section-4.1.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1-4">Then the remaining bytes are reduces by appling varint decoded to obtain the individual member proofs.<a href="#section-4.1.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1-5">The compressed representations MUST NOT encode the original member bytes.<a href="#section-4.1.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1-6">The order of member bytes MUST be preserved in some external data structure, in order to suppor full disclosure proof verification.<a href="#section-4.1.2.1-6" class="pilcrow">¶</a></p>
+</section>
 </div>
+<div id="selective-disclosure">
+<section id="section-4.1.2.2">
+            <h5 id="name-selective-disclosure">
+<a href="#section-4.1.2.2" class="section-number selfRef">4.1.2.2. </a><a href="#name-selective-disclosure" class="section-name selfRef">Selective Disclosure</a>
+            </h5>
+<p id="section-4.1.2.2-1">We define <code>Selective Disclosure</code> the same as <code>Full Disclosure</code> with the exception that the <code>rootNonce</code>
+MUST NOT be encoded in the compressed representation.<a href="#section-4.1.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.2-2">The <code>rootNonce</code> MUST be ommited in order to ensure that a selective disclosure proof does not reveal information that can be used to brute force siblings of disclosed members. This attack is also refered to as a second pre-image attack, See <a href="#name-disclosure-of-root-nonce">Disclosure of Root Nonce</a>.<a href="#section-4.1.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.2-3">We recommend never transmitting the full disclosure proof, and instead deriving a selective disclosure proof even for the full disclosure use case.<a href="#section-4.1.2.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
-<div id="derived-proof">
+</section>
+</div>
+<div id="authenticated-full-disclosure-proof">
 <section id="section-4.2">
-        <h3 id="name-derived-proof">
-<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-derived-proof" class="section-name selfRef">Derived Proof</a>
+        <h3 id="name-authenticated-full-disclosu">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-authenticated-full-disclosu" class="section-name selfRef">Authenticated Full Disclosure Proof</a>
         </h3>
-<div id="decoded-1">
+<p id="section-4.2-1">In order to provide an "issuer" with the capability to provide a set of verifiable claims about a subject, a digital signature over a merkle root and some meta data can be applied.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">We distinguish this data structure from a <code>Full Disclosure Proof</code> by definition.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-4.2-3">
+          <dt id="section-4.2-3.1">Authenticated Full Disclosure Proof</dt>
+          <dd style="margin-left: 1.5em" id="section-4.2-3.2">An encoding of a digital signature over a merkle proot and meta data, encoded next to a <code>Full Disclosure Proof</code>.<a href="#section-4.2-3.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.2-4">Under this scheme a verifier MUST first, verify the signature by obtaining the associated public key from the meta data.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2-5">If the signature is valid, the verifier MUST second, verify all members of the disclosed proof have a corresponding encoded member proof.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">If all members have a proof and the merkle root has a signature that is verified by the public key dereferenced by from the meta data we say:<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.2-7">The issuer has provided a full disclosure proof for the encoded members.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
+<p id="section-4.2-8">In other words, the issuer claims the members are in a set, and this claim can be verified as originating from the issuer and not having been tampered with under the assumption that the issuer's signing keys have not been compromised.<a href="#section-4.2-8" class="pilcrow">¶</a></p>
+<p id="section-4.2-9">For a more formal definition of digital signature verification see [[RFC7515]] and [[RFC7797]].<a href="#section-4.2-9" class="pilcrow">¶</a></p>
+<div id="jose">
 <section id="section-4.2.1">
-          <h4 id="name-decoded-2">
-<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-decoded-2" class="section-name selfRef">Decoded</a>
+          <h4 id="name-jose">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-jose" class="section-name selfRef">JOSE</a>
           </h4>
-<div class="alignLeft art-text artwork" id="section-4.2.1-1">
-<pre>{
-
-  // From JWP "Protected Header"
-  // always disclosed
-  "protected": {
-
-    "kid": "did:example:123#key-0"
-
-    "root": "SflKxwRJSM...",
-    "alg": "MDP+ES256+JP", // merkle disclosure with json pointer
-    "zip": "DEF"
-
-    "signature": "SflKxwRJSM", // over the entire protected header.
-  },
-
-  // From JWP "Payloads" and "Proof"
-  // selectively disclosed
-  "payloads": [ { message }, ...]
-  "proof": [ { path }, ... ],
-}
-</pre><a href="#section-4.2.1-1" class="pilcrow">¶</a>
-</div>
+<p id="section-4.2.1-1">TODO: We are discussing JSON encodings of Authenticated Full Disclosure proofs <a href="https://github.com/json-web-proofs/json-web-proofs/issues/15">here</a>.<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="encoded-1">
+<div id="cose">
 <section id="section-4.2.2">
-          <h4 id="name-encoded-2">
-<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-encoded-2" class="section-name selfRef">Encoded</a>
+          <h4 id="name-cose">
+<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-cose" class="section-name selfRef">COSE</a>
           </h4>
-<div class="alignLeft art-text artwork" id="section-4.2.2-1">
-<pre>PROTECTED.PAYLOADS.PROOF // base64url ( JSON.stringify )
-</pre><a href="#section-4.2.2-1" class="pilcrow">¶</a>
-</div>
-<p id="section-4.2.2-2">//TODO<a href="#section-4.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.2-1">TODO: We are ommiting COSE encodings until JWP is on a standards track.<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
+<div id="authenticated-selective-disclosure-proof">
+<section id="section-4.3">
+        <h3 id="name-authenticated-selective-dis">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-authenticated-selective-dis" class="section-name selfRef">Authenticated Selective Disclosure Proof</a>
+        </h3>
+<p id="section-4.3-1">Similar to the <code>Authenticated Full Disclosure Proof</code> we define an Authenticated Selective Disclosure by definition:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-4.3-2">
+          <dt id="section-4.3-2.1">Authenticated Selective Disclosure Proof</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-2.2">An encoding of a digital signature over a merkle proot and meta data, encoded next to a <code>Selective Disclosure Proof</code>.<a href="#section-4.3-2.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.3-3">We note that a <code>Selective Disclosure Proof</code> MUST be derived from an associated <code>Full Disclosure Proof</code>.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">This derivation process omits the <code>rootNonce</code> and filter the associated <code>member proofs</code>.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3-5">We refer to the set of disclosed members proofs as:<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlCompact dlParallel" id="section-4.3-6">
+          <dt id="section-4.3-6.1">Disclosed Member Series</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-6.2">A series (order matters) of membership proofs for a given merkle root.<a href="#section-4.3-6.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.3-6.3">Redacted Member Series</dt>
+          <dd style="margin-left: 1.5em" id="section-4.3-6.4">A series (order matters) of membership proofs which were present in the original <code>Full Disclosure Proof</code>, but are ommited in the <code>Selective Disclosure Proof</code>.<a href="#section-4.3-6.4" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.3-7">We note that the <code>Redacted Member Series</code> may have size 0, however the absence of the <code>rootNonce</code> still differentiates the <code>Authenticated Selective Disclosure Proof</code> from an <code>Authenticated Full Disclosure Proof</code>.<a href="#section-4.3-7" class="pilcrow">¶</a></p>
+<div id="jose-1">
+<section id="section-4.3.1">
+          <h4 id="name-jose-2">
+<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-jose-2" class="section-name selfRef">JOSE</a>
+          </h4>
+<p id="section-4.3.1-1">TODO: We are discussing JSON encodings of Authenticated Selective Disclosure proofs <a href="https://github.com/json-web-proofs/json-web-proofs/issues/15">here</a>.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="cose-encoding">
-<section id="section-5">
-      <h2 id="name-cose-encoding">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-cose-encoding" class="section-name selfRef">COSE Encoding</a>
-      </h2>
-<p id="section-5-1">//TODO<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="cose-1">
+<section id="section-4.3.2">
+          <h4 id="name-cose-2">
+<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-cose-2" class="section-name selfRef">COSE</a>
+          </h4>
+<p id="section-4.3.2-1">TODO: We are ommiting COSE encodings until JWP is on a standards track.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-6">
+<section id="section-5">
       <h2 id="name-security-considerations">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
 <div id="validating-public-keys">
-<section id="section-6.1">
+<section id="section-5.1">
         <h3 id="name-validating-public-keys">
-<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-validating-public-keys" class="section-name selfRef">Validating public keys</a>
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-validating-public-keys" class="section-name selfRef">Validating Public Keys</a>
         </h3>
-<p id="section-6.1-1">All algorithms in Section 2 that operate on public keys require first validating those keys.
-For the sign, verify and proof schemes, the use of KeyValidate is REQUIRED.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-1">All algorithms that operate on public keys require first validating those keys.
+We assume all keys are represented according to [[RFC7517]].<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Implementers are warned to consider base64url padding concerns.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="disclosure-of-root-nonce">
-<section id="section-6.2">
+<section id="section-5.2">
         <h3 id="name-disclosure-of-root-nonce">
-<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-disclosure-of-root-nonce" class="section-name selfRef">Disclosure of root nonce</a>
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-disclosure-of-root-nonce" class="section-name selfRef">Disclosure of Root Nonce</a>
         </h3>
-<p id="section-6.2-1">If the root nonc associatd with a merkle root is disclosed, a verifier or attacker can compute adjcacent membership proofs from sets of disclosed proofs.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-1">If the root nonce associated with a merkle root is disclosed, a verifier or attacker can compute adjacent membership proofs from sets of disclosed proofs.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="forgery-attacks-on-unbalanced-binary-merkle-trees">
+<section id="section-5.3">
+        <h3 id="name-forgery-attacks-on-unbalanc">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-forgery-attacks-on-unbalanc" class="section-name selfRef">Forgery Attacks on Unbalanced Binary Merkle Trees</a>
+        </h3>
+<p id="section-5.3-1">When a binary merkle tree is unbalanced (last level leaf count is not a power of 2), there is a potential for a forgery attack.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">See <a href="https://bitcointalk.org/?topic=102395">CVE-2012-2459</a>.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">We remain unable to prove that our salting approach mitigates this potential vulnerability, as such the question remains:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<blockquote id="section-5.3-4">
+          <p id="section-5.3-4.1">does salting members before construction prevent forgery attacks on unbalanced binary merkle trees?<a href="#section-5.3-4.1" class="pilcrow">¶</a></p>
+</blockquote>
+<p id="section-5.3-5">A note that [[RFC9162]] <a href="https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1">constructs merkle tree's differently</a>.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="side-channel-attacks">
-<section id="section-6.3">
+<section id="section-5.4">
         <h3 id="name-side-channel-attacks">
-<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-side-channel-attacks" class="section-name selfRef">Side channel attacks</a>
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-side-channel-attacks" class="section-name selfRef">Side Channel Attacks</a>
         </h3>
-<p id="section-6.3-1">Implementations of the signing algorithm SHOULD protect the secret key from side-channel attacks. One method for protecting against certain side-channel attacks is ensuring that the implementation executes exactly the same sequence of instructions and performs exactly the same memory accesses, for any value of the secret key. ( this copied verbatum form <a href="https://raw.githubusercontent.com/mattrglobal/bbs-signatures-spec/master/spec.md">here</a>).<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-1">Implementations of the signing algorithm SHOULD protect the secret key from side-channel attacks. One method for protecting against certain side-channel attacks is ensuring that the implementation executes exactly the same sequence of instructions and performs exactly the same memory accesses, for any value of the secret key. ( this copied verbatum from <a href="https://raw.githubusercontent.com/mattrglobal/bbs-signatures-spec/master/spec.md">here</a>).<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="randomness-considerations">
-<section id="section-6.4">
+<section id="section-5.5">
         <h3 id="name-randomness-considerations">
-<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-randomness-considerations" class="section-name selfRef">Randomness considerations</a>
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-randomness-considerations" class="section-name selfRef">Randomness Considerations</a>
         </h3>
-<p id="section-6.4-1">It is recommended that the all nonces are from a trusted source of randomness.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.5-1">It is recommended that the all nonces are from a trusted source of randomness AND all randomness is used for a single purpose.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.5-2">For example, do not reuse randomness associated with Root Nonce for anything else.<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="choice-of-hash-primitive">
+<section id="section-5.6">
+        <h3 id="name-choice-of-hash-primitive">
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-choice-of-hash-primitive" class="section-name selfRef">Choice of Hash Primitive</a>
+        </h3>
+<p id="section-5.6-1">The disclosure proofs defined herin rely on "Merkle Audit Paths" which are built from binary merkle trees under a chose hash function.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.6-2">The choice of the hash function such as SHA-256 or SHAKE-256 is out of scope for this specification.<a href="#section-5.6-2" class="pilcrow">¶</a></p>
+<p id="section-5.6-3">However, at the time of publishing we recommend a cryptographic hash function with at least 256-bit security strength.<a href="#section-5.6-3" class="pilcrow">¶</a></p>
+<p id="section-5.6-4">Implementers are advised to consult:<a href="#section-5.6-4" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-5.6-5.1">[[RFC8702]]<a href="#section-5.6-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-5.6-5.2">[[RFC4634]]<a href="#section-5.6-5.2" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-5.6-5.3">
+            <a href="https://csrc.nist.rip/external/nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf">NIST SP 800-185</a><a href="#section-5.6-5.3" class="pilcrow">¶</a>
+</li>
+        </ul>
 </section>
 </div>
 <div id="choice-of-signature-primitive">
-<section id="section-6.5">
+<section id="section-5.7">
         <h3 id="name-choice-of-signature-primiti">
-<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-choice-of-signature-primiti" class="section-name selfRef">Choice of Signature Primitive</a>
+<a href="#section-5.7" class="section-number selfRef">5.7. </a><a href="#name-choice-of-signature-primiti" class="section-name selfRef">Choice of Signature Primitive</a>
         </h3>
-<p id="section-6.5-1">TODO: comment on JOSE / COSE.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.7-1">Alone a Full Disclosure Proof can only prove membership, and is subject to tampering.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
+<p id="section-5.7-2">When combined with digital signature schemes, authentication is achievable.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
+<p id="section-5.7-3">The choice of the signature scheme such as ES256K or EdDSA is out of scope for this specification.<a href="#section-5.7-3" class="pilcrow">¶</a></p>
+<p id="section-5.7-4">Implementers are advised to consult:<a href="#section-5.7-4" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-5.7-5.1">
+            <a href="https://www.iana.org/assignments/jose/jose.xhtml">IANA JOSE Registry</a><a href="#section-5.7-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-5.7-5.2">
+            <a href="https://csrc.nist.gov/publications/detail/fips/186/5/draft">FIPS 186-5</a><a href="#section-5.7-5.2" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-5.7-5.3">
+            <a href="https://safecurves.cr.yp.to/">safecurves.cr.yp.to</a><a href="#section-5.7-5.3" class="pilcrow">¶</a>
+</li>
+        </ul>
 </section>
 </div>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-7">
+<section id="section-6">
       <h2 id="name-iana-considerations">
-<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-7-1">This document does not make any requests of IANA.<a href="#section-7-1" class="pilcrow">¶</a></p>
-<p id="section-7-2">TODO:<a href="#section-7-2" class="pilcrow">¶</a></p>
-<p id="section-7-3">Request for JOSE and COSE...:<a href="#section-7-3" class="pilcrow">¶</a></p>
-<ul class="compact">
-<li class="compact" id="section-7-4.1">alg: MDP+ES256+JP<a href="#section-7-4.1" class="pilcrow">¶</a>
+<p id="section-6-1">The following has NOT YET been added to the "JSON Web Proof Algorithm Types" registry:<a href="#section-6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.1">Algorithm Name: "ES256+MDSHA256"<a href="#section-6-2.1" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-7-4.2">alg: MDP+ES384+JP<a href="#section-7-4.2" class="pilcrow">¶</a>
+        <li class="normal" id="section-6-2.2">Algorithm Description: ECDSA under P-256 (secp256r1) with binary merkle trees under SHA-256.<a href="#section-6-2.2" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-7-4.3">etc...<a href="#section-7-4.3" class="pilcrow">¶</a>
+        <li class="normal" id="section-6-2.3">Algorithm Usage Location(s): "alg"<a href="#section-6-2.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.4">JOSE Implementation Requirements: Optional<a href="#section-6-2.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.5">Change Controller: IESG<a href="#section-6-2.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.6">Specification Document(s): Section of this document (RFC TBD)<a href="#section-6-2.6" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-6-2.7">
+          <p id="section-6-2.7.1">Algorithm Analysis Documents(s): [RFC TBD]<a href="#section-6-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.8">
+          <p id="section-6-2.8.1">Algorithm Name: "ES256K+MDSHA256"<a href="#section-6-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.9">
+          <p id="section-6-2.9.1">Algorithm Description: ECDSA under Secp256k1 (bitcoin and ethereum curve) with binary merkle trees under SHA-256.<a href="#section-6-2.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.10">
+          <p id="section-6-2.10.1">Algorithm Usage Location(s): "alg"<a href="#section-6-2.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.11">
+          <p id="section-6-2.11.1">JOSE Implementation Requirements: Optional<a href="#section-6-2.11.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.12">
+          <p id="section-6-2.12.1">Change Controller: IESG<a href="#section-6-2.12.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.13">
+          <p id="section-6-2.13.1">Specification Document(s): Section of this document (RFC TBD)<a href="#section-6-2.13.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.14">
+          <p id="section-6-2.14.1">Algorithm Analysis Documents(s): [RFC TBD]<a href="#section-6-2.14.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.15">
+          <p id="section-6-2.15.1">Algorithm Name: "EdDSA+MDSHA256"<a href="#section-6-2.15.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.16">
+          <p id="section-6-2.16.1">Algorithm Description: EdDSA under Ed25519 with binary merkle trees under SHA-256.<a href="#section-6-2.16.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.17">
+          <p id="section-6-2.17.1">Algorithm Usage Location(s): "alg"<a href="#section-6-2.17.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.18">
+          <p id="section-6-2.18.1">JOSE Implementation Requirements: Optional<a href="#section-6-2.18.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.19">
+          <p id="section-6-2.19.1">Change Controller: IESG<a href="#section-6-2.19.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.20">
+          <p id="section-6-2.20.1">Specification Document(s): Section of this document (RFC TBD)<a href="#section-6-2.20.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.21">
+          <p id="section-6-2.21.1">Algorithm Analysis Documents(s): [RFC TBD]<a href="#section-6-2.21.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
 </div>
 <div id="appendix">
-<section id="section-8">
+<section id="section-7">
       <h2 id="name-appendix">
-<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-appendix" class="section-name selfRef">Appendix</a>
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-appendix" class="section-name selfRef">Appendix</a>
       </h2>
 <ul class="compact">
-<li class="compact" id="section-8-1.1">JSON Web Signature (JWS) - <a href="https://tools.ietf.org/html/rfc7515">RFC7515</a><a href="#section-8-1.1" class="pilcrow">¶</a>
+<li class="compact" id="section-7-1.1">JSON Web Signature (JWS) - <a href="https://tools.ietf.org/html/rfc7515">RFC7515</a><a href="#section-7-1.1" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.2">JSON Web Encryption (JWE) - <a href="https://tools.ietf.org/html/rfc7516">RFC7516</a><a href="#section-8-1.2" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.2">JSON Web Encryption (JWE) - <a href="https://tools.ietf.org/html/rfc7516">RFC7516</a><a href="#section-7-1.2" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.3">JSON Web Key (JWK) - <a href="https://tools.ietf.org/html/rfc7517">RFC7517</a><a href="#section-8-1.3" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.3">JSON Web Key (JWK) - <a href="https://tools.ietf.org/html/rfc7517">RFC7517</a><a href="#section-7-1.3" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.4">JSON Web Algorithms (JWA) - <a href="https://tools.ietf.org/html/rfc7518">RFC7518</a><a href="#section-8-1.4" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.4">JSON Web Algorithms (JWA) - <a href="https://tools.ietf.org/html/rfc7518">RFC7518</a><a href="#section-7-1.4" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.5">JSON Web Token (JWT) - <a href="https://tools.ietf.org/html/rfc7519">RFC7519</a><a href="#section-8-1.5" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.5">JSON Web Token (JWT) - <a href="https://tools.ietf.org/html/rfc7519">RFC7519</a><a href="#section-7-1.5" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.6">JSON Web Key Thumbprint - <a href="https://tools.ietf.org/html/rfc7638">RFC7638</a><a href="#section-8-1.6" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.6">JSON Web Key Thumbprint - <a href="https://tools.ietf.org/html/rfc7638">RFC7638</a><a href="#section-7-1.6" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.7">JWS Unencoded Payload Option - <a href="https://tools.ietf.org/html/rfc7797">RFC7797</a><a href="#section-8-1.7" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.7">JWS Unencoded Payload Option - <a href="https://tools.ietf.org/html/rfc7797">RFC7797</a><a href="#section-7-1.7" class="pilcrow">¶</a>
 </li>
-        <li class="compact" id="section-8-1.8">CFRG Elliptic Curve ECDH and Signatures - <a href="https://tools.ietf.org/html/rfc8037">RFC8037</a><a href="#section-8-1.8" class="pilcrow">¶</a>
+        <li class="compact" id="section-7-1.8">CFRG Elliptic Curve ECDH and Signatures - <a href="https://tools.ietf.org/html/rfc8037">RFC8037</a><a href="#section-7-1.8" class="pilcrow">¶</a>
 </li>
       </ul>
 <div id="test-vectors">
-<section id="section-8.1">
+<section id="section-7.1">
         <h3 id="name-test-vectors">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
         </h3>
-<p id="section-8.1-1">//TODO<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">//TODO<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
-<section id="section-9">
+<section id="section-8">
       <h2 id="name-normative-references">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
       </h2>
 <dl class="references">
 <dt id="RFC2119">[RFC2119]</dt>
-      <dd>
-<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC6234">[RFC6234]</dt>
     <dd>
-<span class="refAuthor">Eastlake 3rd, D.</span> and <span class="refAuthor">T. Hansen</span>, <span class="refTitle">"US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)"</span>, <span class="seriesInfo">RFC 6234</span>, <span class="seriesInfo">DOI 10.17487/RFC6234</span>, <time datetime="2011-05" class="refDate">May 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6234">https://www.rfc-editor.org/info/rfc6234</a>&gt;</span>. </dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

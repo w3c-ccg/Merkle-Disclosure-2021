@@ -165,7 +165,7 @@ We believe that BLS signature over BLS12381 as defined in [Pairing-Friendly Curv
 
 Binary Merkle Trees are constructed via the following algorithm:
 
-See [@transmute/merkle-proof compute tree](https://github.com/transmute-industries/verifiable-data/blob/main/packages/merkle-proof/src/index.ts#L179)
+See [compute tree](https://github.com/transmute-industries/verifiable-data/blob/main/packages/merkle-proof/src/index.ts#L179)
 
 ```
 let salted_members be the series defined by hashing the concatonation of each member bytes with its member nonce.
