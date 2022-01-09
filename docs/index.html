@@ -21,8 +21,8 @@
     <script type="text/javascript" class="remove">
       var respecConfig = {
         specStatus: "unofficial",
-        shortName: 'merkle-disclosure-proof-2021',
-        edDraftURI: "https://transmute-industries.github.io/merkle-disclosure-proof-2021/",
+        shortName: 'merkle-disclosure-2021',
+        edDraftURI: "https://w3c-ccg.github.io/Merkle-Disclosure-2021/",
         xref: {
           specs: ['DID-CORE', 'VC-DATA-MODEL', 'RFC7515', 'RFC6901'],
           profile: 'web-platform',
@@ -65,7 +65,7 @@
         doJsonLd: true,
 
         github: {
-          repoURL: 'https://github.com/transmute-industries/merkle-disclosure-proof-2021',
+          repoURL: 'https://github.com/w3c-ccg/Merkle-Disclosure-2021',
           branch: 'main',
         },
         includePermalinks: false,
@@ -117,6 +117,10 @@
 
   <body>
     <section id="abstract">
+      <p>
+        This document is not the current focus, we are focusing on refining JWP encodings for merkle proofs first.
+        See the latest <a href="https://w3c-ccg.github.io/Merkle-Disclosure-2021/jwp/">JWP for Merkle Proofs Draft here</a>.
+      </p>
       <p>
         This document defines a mechanism for
 
@@ -194,6 +198,10 @@
             "kid": "did:key:z6MkokrsVo8DbGDsnMAjnoHhJotMbDZiHfvxM4j65d8prXUr#z6MkokrsVo8DbGDsnMAjnoHhJotMbDZiHfvxM4j65d8prXUr"
         }
         </pre>
+
+        <p class="issue">
+          Example outdated, will be revised to use JWP.
+         </p>
         <pre class="example" title="Decoded payload">
         {
             "iss": "did:key:z6MkokrsVo8DbGDsnMAjnoHhJotMbDZiHfvxM4j65d8prXUr",
@@ -584,12 +592,13 @@ export { objectToMessages, messagesToObject };
           <p class="advisement">
             This normalization approach is different from [[LD-PROOFS]] and [[LDP-BBS2020]]. 
             The reason for the diffence is to address a common way to encode object payloads as messages, 
-            that is not bound to RDF, but remains compatible with it.
+            that is not bound to RDF, but remains compatible with it. 
+            Also the examples in the current repo are massively outdated, and will be revised to support JWP.
           </p>
 
           <p>URDNA2015 normalization is not recommended due to its fragility with respect to context changes.</p>
 
-          <p>See the source code <a href="https://github.com/transmute-industries/merkle-disclosure-proof-2021/blob/main/src/merkle/normalization/urdna2015.ts">here</a>.</p>
+          <p>See the source code <a href="https://github.com/w3c-ccg/Merkle-Disclosure-2021/blob/main/packages/linked-data-proof/src/merkle/normalization/urdna2015.ts">here</a>.</p>
 
         </section>
 
@@ -598,17 +607,9 @@ export { objectToMessages, messagesToObject };
       <section>
         <h3>Membership Proofs</h3>
 
-        <p>In our proof of concept with use the sha256 hash algorithm and a binary encoding of merkle proofs.</p>
+        <p>The membership proofs are expected to be represented as JWPs.</p>
 
-        <p class="advisement">Standard encodings of merkle proofs is an area for future work.</p>
-
-        <p>See the source code <a href="https://github.com/transmute-industries/merkle-disclosure-proof-2021/blob/main/src/merkle/merkle.ts">here</a>.</p>
-
-        <p class='advisement'>
-          In order to mitigate a verifier's ability to brute force set membership, 
-          this quite requires a disclosure to be derived with unique nonces deterministically 
-          generated from the original credential.
-        </p>
+        <p>We are maintaining the DRAFT for JWP Merkle Proofs <a href="https://w3c-ccg.github.io/Merkle-Disclosure-2021/jwp/">here</a></p>
 
       </section>
 
@@ -637,6 +638,10 @@ export { objectToMessages, messagesToObject };
         </p>
         <p>In order to address this challenge, 
           we rely on a proof representation that makes use of binary compression:</p>
+
+          <p class="issue">
+           Example outdated, will be revised to use JWP.
+          </p>
 <pre class="example">
 {
   "type": "MerkleDisclosureProof2021",
@@ -659,36 +664,7 @@ export { objectToMessages, messagesToObject };
           and the proofs associated with those messages.
         </p>
 
-        <p>Here is a TypeScript example:</p>
-
-        <pre class="example">
-const suite = new MerkleDisclosureProof2021();
-const derivationResult = await suite.deriveProof({
-  inputDocumentWithProof: { ...originalDocumentWithProof },
-  outputDocument: {
-    '@context': [
-      'https://www.w3.org/2018/credentials/v1',
-      'https://w3id.org/security/suites/merkle-jws-2021/v1',
-      {
-        alsoKnownAs: 'https://www.w3.org/ns/activitystreams#alsoKnownAs',
-        // nickName: 'https://www.w3.org/ns/activitystreams#nickName',
-      },
-    ],
-    id: 'http://example.edu/credentials/3732',
-    type: ['VerifiableCredential'],
-    issuer: 'https://example.edu/issuers/14',
-    issuanceDate: '2010-01-01T19:23:24Z',
-    credentialSubject: {
-      alsoKnownAs: 'did:example:ebfeb1f712ebc6f1c276e12ec21',
-      //   nickName: 'Bob',
-    },
-  },
-  documentLoader,
-});
-const { document, proof } = derivationResult;
-        </pre>
-
-
+        
         <p class="note">
           Unlike [[LDP-BBS2020]], our proof of concept does not rely on [[JSON-LD-FRAMING]]. 
           This is due to also not relying exclusively on [[RDF-DATASET-NORMALIZATION]]. 

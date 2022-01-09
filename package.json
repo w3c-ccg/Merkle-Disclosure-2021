@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "postinstall": "lerna bootstrap",
-    "build": "lerna run build"
+    "build": "lerna run build",
+    "serve": "npx serve docs"
   },
   "devDependencies": {
     "lerna": "^3.22.1"

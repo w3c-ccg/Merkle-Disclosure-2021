@@ -20,6 +20,16 @@ fullname = "Orie Steele"
 organization = "Transmute"
 [author.address]
 email = "orie@transmute.industries"
+
+[[author]]
+initials = "M."
+surname = "Prorock"
+fullname = "Michael Prorock"
+#role = "editor"
+organization = "mesur.io"
+[author.address]
+email = "mprorock@mesur.io"
+
 %%%
 .# Abstract
 
