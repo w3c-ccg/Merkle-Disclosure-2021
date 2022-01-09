@@ -1,6 +1,6 @@
 %%%
-title = "Json Web Proof Merkle Disclosure Token"
-abbrev = "JWP-MDT"
+title = "Json Web Proofs for Binary Merkle Trees"
+abbrev = "JWP-BMT"
 ipr= "none"
 area = "Internet"
 workgroup = "none"
@@ -9,7 +9,7 @@ keyword = [""]
 
 [seriesInfo]
 name = "Individual-Draft"
-value = "jwp-mdt-00"
+value = "jwp-bmt-00"
 status = "informational"
 
 [[author]]
@@ -94,56 +94,283 @@ const calculateMessageNonce = (
 };
 ```
 
+Salted Member
+: The hash of a member bytes and its `memberNonce` under a chosen cryptographic hash function. These values represent the leaves of a binary merkle tree that encodes membership proofs for salted members.
+
+Binary Merkle Tree of Salted Members
+: The binary merkle tree produced through concatonation, and hashing of `Salted Members`
+
 # Overview
+
+## K-ary Merkle Trees
+
+We restrict this specification to Binary (2-ary) Merkle Trees.
+
+In short, increasing the branching factor of the merkle tree above 2 does not yield the desired properties.
+
+See [Verkle Trees](https://math.mit.edu/research/highschool/primes/materials/2018/Kuszmaul.pdf).
+
+See [Vector Commitments and their Applications](https://eprint.iacr.org/2011/495.pdf).
+
+See [Zero-Knowledge Sets with short proofs](https://www.iacr.org/archive/eurocrypt2008/49650430/49650430.pdf).
+
+Vector commitment schemes are not defined in this specification,
+however we believe that some similar approach using them would be worth considering in future work.
 
 ## Comparison with RFC9162
 
-TODO
+### Tree Construction
+
+The most obvious difference is the limitations imposed on tree construction that differ from the construction of tree's used by Bitcoin.
+
+See [RFC9162 Definition of the Merkle Tree](https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1).
+
+### Agility for Hash Algorithms
+
+[[RFC9162]] refer to the IANA registry for [Hash Algorithms](https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.1)
+
+But only define support for [SHA-256](https://oidref.com/2.16.840.1.101.3.4.2.1)
+
+### Agility for Signature Algorithms
+
+[[RFC9262]] refer to IANA registry for [Signature Algorithms](https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.2)
+
+But only define support for a few signature algorithms:
+
+- ecdsa_secp256r1_sha256
+- ecdsa_secp256r1_sha256
+- ed25519
+
+We prefer to generalize and enable support the full range of algorithms availabe under [jose](https://www.iana.org/assignments/jose/jose.xhtml).
+
+We believe choices regarding agility should be handled at a higher layer, but agree that restriction is a best practice.
 
 ## Comparison with BBS+ Signatures
 
-TODO
+BBS+ Signatures are in the process of being standardized.
+
+Refer to [Editors Draft of BBS+ Signature Scheme](https://mattrglobal.github.io/bbs-signatures-spec/) for details.
+
+At a high level, we are seeking a larger degree of agility at both the hash and digital signature layers.
+
+## Agility for Hash Algorithms
+
+We believe that Blake2b as defined in [[RFC7693]] is the only supported hash algorithm.
+
+## Agility for Signature Algorithms
+
+We believe that BLS signature over BLS12381 as defined in [Pairing-Friendly Curves](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-pairing-friendly-curves-10), are the only supported signature scheme.
+
+# Tree Constuction
+
+Binary Merkle Trees are constructed via the following algorithm:
+
+See [@transmute/merkle-proof compute tree](https://github.com/transmute-industries/verifiable-data/blob/main/packages/merkle-proof/src/index.ts#L179)
+
+```
+let salted_members be the series defined by hashing the concatonation of each member bytes with its member nonce.
+let salted_members be the first level of a binary merkle tree, where each salted member is a leaf.
+for each pair of 2 leaves in the first level of the merkle tree, concatonate the leave and hash the result yielding the next first level of the merkle tree.
+if the first level of the tree is odd AND its length is not 1 (the end state), promote the odd leaf to the next leve and repeat the process.
+The algorithm ends when the first level of the merkle tree has length 1, its single element is the merkle root.
+```
+
+Here is a simple visualizaton of a tree constructed in this manner:
+
+```
+      h(h(h(sm0+sm1) + h(sm2+sm3)) + sm4) (merkle root)
+      /                         \
+    h(h(sm0+sm1) + h(sm2+sm3))  sm4 (2 siblings)
+    /          \                /
+   h(sm0+sm1)   h(sm2+sm3)   sm4 (3 siblings)
+  /   \        /   \         /
+sm0   sm1   sm2    sm3      sm4 (leaves are the base level, 5 siblings)
+^     ^     ^      ^        ^
+|     |     |      |        |
+m0    m1    m2     m3       m4
+```
+
+Note that this tree is "unbalanced" See [Forgery Attacks on Unbalanced Binary Merkle Trees](#name-forgery-attacks-on-unbalanced-binary-merkle-trees).
+
+Also note that this algorithm differs from the one proposed in [RFC9162](https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1).
+
+The reason for this difference arises from our desire to support merkle trees and proofs used by [Bitcoin](https://bitcoin.stackexchange.com/questions/69018/merkle-root-and-merkle-proofs), and our desire to encode a generic merkle proof that is not bound to "Certificate Transparency".
+
+However, we may adjust the algorithm to match the one described in [[RFC9162]] in the future.
 
 # Encoding
 
-## Full Disclosure Proof
+## Binary
 
-### Binary
+### Merkle Audit Paths
 
-#### Merkle Audit Paths
+In order to verify that member bytes are included in a merkle root, a verifier requires:
 
-#### Sets of Merkle Audit Paths
+1. A nonce for the member bytes to protect against second pre-image attacks.
+2. An "audit path" or "inclusion path" from the member leaf to the merkle root.
+
+This section defines a compact binary encoding of these "member proofs" based on approaches developed by Google and others related to "Protocol Buffers".
+
+The main feature of protocol buffers which is used is called "varint".
+
+This approach is also refered to as [LEB128](https://en.wikipedia.org/wiki/LEB128).
+
+This approach is also used in [Web Assembly](https://webassembly.github.io/spec/core/binary/values.html)
+
+This approach is also used in [multiformats](https://pkg.go.dev/github.com/multiformats/go-varint).
+
+We remain unaware of a best normative reference to provide for "protocol buffer style varints".
+
+See this expired [internet draft for protocol buffers](https://datatracker.ietf.org/doc/html/draft-rfernando-protocol-buffers-00#page-5).
+
+See [Google's documentation for protocol buffers](https://developers.google.com/protocol-buffers).
+
+#### Encoding of Inclusion Paths
+
+We describe a binary encoding of an "audit path" or "inclusion path" and a nonce, such that a verifier with a merkle root may confirm that some given "member bytes" are included in a merkle root.
+
+We define a binary encoded "membership proof" or a given "member" bytes as follows:
+
+numberOfAuditHashesProofs
+: A positive integer encoded via `varint`, representing the size of `auditDirectionsAsBits` and `auditHashes`.
+
+auditDirectionsAsBits
+: A binary encoded bitstring representing the directions (left or right) in path from a leaf to a root in a binary merkle tree.
+
+memberNonce
+: A value derived from a cryptographic hash function and the Root Nonce. This value MUST have the same length as each Hash in `auditHashes`
+
+auditHashes
+: A series (ordered) of hashes of size determined by the cryptographic hash function chosen, (32 bytes for SHA256).
+
+See Test Vectors for specific examples.
+
+### Encoding Membership Proofs
+
+We describe a binary encoding of a Root Nonce, Merkle Root, and series (order matters) of "audit path" or "inclusion paths".
+
+These values are encoded via a convention of `varint(length of bytes) + bytes`.
+
+This is to support hash functions of varying lengths and member proofs of varying lengths.
+
+#### Full Disclosure
+
+We define a `Full Disclosure` membership proof as the result of compression (under zlib v1.2.8) of the following:
+
+rootNonce
+: A value produced by the chosen cryptographic hash function applied to some source of randomness. See [Randomness considerations](#name-randomness-considerations). This value is encoded as varint (root nonce length in bytes) + root nonce bytes.
+
+root
+: A merkle root defined from a binary merkle tree composed of members derived from the hash of the member bytes and the `memberNonce`. See [Tree Construction](#name-tree-construction). This value is encoded as varint (root length in bytes) + root bytes.
+
+membershipProofs
+: A series of "membership proof" bytes, encoded under the scheme: varint (member proof length in bytes) + member proof bytes.
+
+When decoding first the `rootNonce` and `root` are removed using varint decoding.
+
+Then the remaining bytes are reduces by appling varint decoded to obtain the individual member proofs.
+
+The compressed representations MUST NOT encode the original member bytes.
+
+The order of member bytes MUST be preserved in some external data structure, in order to suppor full disclosure proof verification.
+
+#### Selective Disclosure
+
+We define `Selective Disclosure` the same as `Full Disclosure` with the exception that the `rootNonce`
+MUST NOT be encoded in the compressed representation.
+
+The `rootNonce` MUST be ommited in order to ensure that a selective disclosure proof does not reveal information that can be used to brute force siblings of disclosed members. This attack is also refered to as a second pre-image attack, See [Disclosure of Root Nonce](#name-disclosure-of-root-nonce).
+
+We recommend never transmitting the full disclosure proof, and instead deriving a selective disclosure proof even for the full disclosure use case.
+
+## Authenticated Full Disclosure Proof
+
+In order to provide an "issuer" with the capability to provide a set of verifiable claims about a subject, a digital signature over a merkle root and some meta data can be applied.
+
+We distinguish this data structure from a `Full Disclosure Proof` by definition.
+
+Authenticated Full Disclosure Proof
+: An encoding of a digital signature over a merkle proot and meta data, encoded next to a `Full Disclosure Proof`.
+
+Under this scheme a verifier MUST first, verify the signature by obtaining the associated public key from the meta data.
+
+If the signature is valid, the verifier MUST second, verify all members of the disclosed proof have a corresponding encoded member proof.
+
+If all members have a proof and the merkle root has a signature that is verified by the public key dereferenced by from the meta data we say:
+
+The issuer has provided a full disclosure proof for the encoded members.
+
+In other words, the issuer claims the members are in a set, and this claim can be verified as originating from the issuer and not having been tampered with under the assumption that the issuer's signing keys have not been compromised.
+
+For a more formal definition of digital signature verification see [[RFC7515]] and [[RFC7797]].
 
 ### JOSE
 
+TODO: We are discussing JSON encodings of Authenticated Full Disclosure proofs [here](https://github.com/json-web-proofs/json-web-proofs/issues/15).
+
 ### COSE
 
-## Selective Disclosure Proof
+TODO: We are ommiting COSE encodings until JWP is on a standards track.
 
-### Binary
+## Authenticated Selective Disclosure Proof
+
+Similar to the `Authenticated Full Disclosure Proof` we define an Authenticated Selective Disclosure by definition:
+
+Authenticated Selective Disclosure Proof
+: An encoding of a digital signature over a merkle proot and meta data, encoded next to a `Selective Disclosure Proof`.
+
+We note that a `Selective Disclosure Proof` MUST be derived from an associated `Full Disclosure Proof`.
+
+This derivation process omits the `rootNonce` and filter the associated `member proofs`.
+
+We refer to the set of disclosed members proofs as:
+
+Disclosed Member Series
+: A series (order matters) of membership proofs for a given merkle root.
+
+Redacted Member Series
+: A series (order matters) of membership proofs which were present in the original `Full Disclosure Proof`, but are ommited in the `Selective Disclosure Proof`.
+
+We note that the `Redacted Member Series` may have size 0, however the absence of the `rootNonce` still differentiates the `Authenticated Selective Disclosure Proof` from an `Authenticated Full Disclosure Proof`.
 
 ### JOSE
 
+TODO: We are discussing JSON encodings of Authenticated Selective Disclosure proofs [here](https://github.com/json-web-proofs/json-web-proofs/issues/15).
+
 ### COSE
+
+TODO: We are ommiting COSE encodings until JWP is on a standards track.
 
 # Security Considerations
 
-## Validating public keys
+## Validating Public Keys
 
 All algorithms that operate on public keys require first validating those keys.
 We assume all keys are represented according to [[RFC7517]].
 
 Implementers are warned to consider base64url padding concerns.
 
-## Disclosure of root nonce
+## Disclosure of Root Nonce
 
 If the root nonce associated with a merkle root is disclosed, a verifier or attacker can compute adjacent membership proofs from sets of disclosed proofs.
 
-## Side channel attacks
+## Forgery Attacks on Unbalanced Binary Merkle Trees
+
+When a binary merkle tree is unbalanced (last level leaf count is not a power of 2), there is a potential for a forgery attack.
+
+See [CVE-2012-2459](https://bitcointalk.org/?topic=102395).
+
+We remain unable to prove that our salting approach mitigates this potential vulnerability, as such the question remains:
+
+> does salting members before construction prevent forgery attacks on unbalanced binary merkle trees?
+
+A note that [[RFC9162]] [constructs merkle tree's differently](https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1).
+
+## Side Channel Attacks
 
 Implementations of the signing algorithm SHOULD protect the secret key from side-channel attacks. One method for protecting against certain side-channel attacks is ensuring that the implementation executes exactly the same sequence of instructions and performs exactly the same memory accesses, for any value of the secret key. ( this copied verbatum from [here](https://raw.githubusercontent.com/mattrglobal/bbs-signatures-spec/master/spec.md)).
 
-## Randomness considerations
+## Randomness Considerations
 
 It is recommended that the all nonces are from a trusted source of randomness AND all randomness is used for a single purpose.
 
