@@ -33,9 +33,9 @@ email = "mprorock@mesur.io"
 %%%
 .# Abstract
 
-Merkle proofs are already being used to provide certificate transparency in [[RFC9162]].
+Merkle proofs are already being used to provide certificate transparency in [@!RFC9162].
 
-The purpose of this specification is to define a **generic** encoding of merkle audit paths that is suitable for combining with [[RFC7515]] to construct selective disclosure proofs, that are not bound to the needs of certificate transparency, and that are suitable for more generic applications such as [W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/) and [W3C Decentralized Identifiers](https://www.w3.org/TR/did-core/).
+The purpose of this specification is to define a **generic** encoding of merkle audit paths that is suitable for combining with [@!RFC7515] to construct selective disclosure proofs, that are not bound to the needs of certificate transparency, and that are suitable for more generic applications such as [W3C Verifiable Credentials](https://www.w3.org/TR/vc-data-model/) and [W3C Decentralized Identifiers](https://www.w3.org/TR/did-core/).
 
 {mainmatter}
 
@@ -46,7 +46,7 @@ The scheme described herin features many important properties:
 1. Defined deterministic nonce generation for membership proofs, to protect against second pre-image attacks.
 2. Defined encoding of binary packed sets of merkle audit paths suitable for expression in JSON.
 3. Defined compression of sets of audit paths to reduce data redundancy for sparse redactions under selective disclosure schemes.
-4. Defined verification of merkle proofs combined with detached JWS as specified by [[RFC7797]].
+4. Defined verification of merkle proofs combined with detached JWS as specified by [@!RFC7797].
 
 These properties allow the scheme to be used in applications where privacy and data minimization techniques are desired and/or required.
 
@@ -64,7 +64,7 @@ document, are to be interpreted as described in [@!RFC2119].
 
 ## Terminology
 
-We will rely on the general terminology defined in [[RFC7515]], [[RFC7797]] and concepts defined in [[RFC9162]].
+We will rely on the general terminology defined in [@!RFC7515], [@!RFC7797] and concepts defined in [@!RFC9162].
 
 We introduce primarily 2 new concepts needed to generalize authenticated set membership proofs based on binary merkle trees.
 
@@ -127,13 +127,13 @@ See [RFC9162 Definition of the Merkle Tree](https://datatracker.ietf.org/doc/htm
 
 ### Agility for Hash Algorithms
 
-[[RFC9162]] refer to the IANA registry for [Hash Algorithms](https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.1)
+[@!RFC9162] refer to the IANA registry for [Hash Algorithms](https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.1)
 
 But only define support for [SHA-256](https://oidref.com/2.16.840.1.101.3.4.2.1)
 
 ### Agility for Signature Algorithms
 
-[[RFC9262]] refer to IANA registry for [Signature Algorithms](https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.2)
+[@!RFC9162] refer to IANA registry for [Signature Algorithms](https://datatracker.ietf.org/doc/html/rfc9162#section-10.2.2)
 
 But only define support for a few signature algorithms:
 
@@ -155,7 +155,7 @@ At a high level, we are seeking a larger degree of agility at both the hash and 
 
 ## Agility for Hash Algorithms
 
-We believe that Blake2b as defined in [[RFC7693]] is the only supported hash algorithm.
+We believe that Blake2b as defined in [@!RFC7693] is the only supported hash algorithm.
 
 ## Agility for Signature Algorithms
 
@@ -196,7 +196,7 @@ Also note that this algorithm differs from the one proposed in [RFC9162](https:/
 
 The reason for this difference arises from our desire to support merkle trees and proofs used by [Bitcoin](https://bitcoin.stackexchange.com/questions/69018/merkle-root-and-merkle-proofs), and our desire to encode a generic merkle proof that is not bound to "Certificate Transparency".
 
-However, we may adjust the algorithm to match the one described in [[RFC9162]] in the future.
+However, we may adjust the algorithm to match the one described in [@!RFC9162] in the future.
 
 # Encoding
 
@@ -302,7 +302,7 @@ The issuer has provided a full disclosure proof for the encoded members.
 
 In other words, the issuer claims the members are in a set, and this claim can be verified as originating from the issuer and not having been tampered with under the assumption that the issuer's signing keys have not been compromised.
 
-For a more formal definition of digital signature verification see [[RFC7515]] and [[RFC7797]].
+For a more formal definition of digital signature verification see [@!RFC7515] and [@!RFC7797].
 
 ### JOSE
 
@@ -346,7 +346,7 @@ TODO: We are ommiting COSE encodings until JWP is on a standards track.
 ## Validating Public Keys
 
 All algorithms that operate on public keys require first validating those keys.
-We assume all keys are represented according to [[RFC7517]].
+We assume all keys are represented according to [@!RFC7517].
 
 Implementers are warned to consider base64url padding concerns.
 
@@ -364,7 +364,7 @@ We remain unable to prove that our salting approach mitigates this potential vul
 
 > does salting members before construction prevent forgery attacks on unbalanced binary merkle trees?
 
-A note that [[RFC9162]] [constructs merkle tree's differently](https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1).
+A note that [@!RFC9162] [constructs merkle tree's differently](https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1).
 
 See issue [#4](https://github.com/w3c-ccg/Merkle-Disclosure-2021/issues/4).
 
@@ -390,8 +390,8 @@ However, at the time of publishing we recommend a cryptographic hash function wi
 
 Implementers are advised to consult:
 
-- [[RFC8702]]
-- [[RFC4634]]
+- [@!RFC8702]
+- [@!RFC4634]
 - [NIST SP 800-185](https://csrc.nist.rip/external/nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf)
 
 ## Choice of Signature Primitive
