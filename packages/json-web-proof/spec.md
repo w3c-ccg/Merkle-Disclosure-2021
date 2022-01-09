@@ -420,6 +420,8 @@ The following has NOT YET been added to the "JSON Web Proof Algorithm Types" reg
 - Specification Document(s): Section of this document (RFC TBD)
 - Algorithm Analysis Documents(s): [RFC TBD]
 
+<br/>
+
 - Algorithm Name: "ES256K+MDSHA256"
 - Algorithm Description: ECDSA under Secp256k1 (bitcoin and ethereum curve) with binary merkle trees under SHA-256.
 - Algorithm Usage Location(s): "alg"
@@ -427,6 +429,8 @@ The following has NOT YET been added to the "JSON Web Proof Algorithm Types" reg
 - Change Controller: IESG
 - Specification Document(s): Section of this document (RFC TBD)
 - Algorithm Analysis Documents(s): [RFC TBD]
+
+<br/>
 
 - Algorithm Name: "EdDSA+MDSHA256"
 - Algorithm Description: EdDSA under Ed25519 with binary merkle trees under SHA-256.
