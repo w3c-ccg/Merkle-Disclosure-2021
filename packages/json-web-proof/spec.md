@@ -366,6 +366,10 @@ We remain unable to prove that our salting approach mitigates this potential vul
 
 A note that [[RFC9162]] [constructs merkle tree's differently](https://datatracker.ietf.org/doc/html/rfc9162#section-2.1.1).
 
+See issue [#4](https://github.com/w3c-ccg/Merkle-Disclosure-2021/issues/4).
+
+See issue [#3](https://github.com/w3c-ccg/Merkle-Disclosure-2021/issues/3).
+
 ## Side Channel Attacks
 
 Implementations of the signing algorithm SHOULD protect the secret key from side-channel attacks. One method for protecting against certain side-channel attacks is ensuring that the implementation executes exactly the same sequence of instructions and performs exactly the same memory accesses, for any value of the secret key. ( this copied verbatum from [here](https://raw.githubusercontent.com/mattrglobal/bbs-signatures-spec/master/spec.md)).
